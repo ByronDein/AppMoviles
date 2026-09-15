@@ -23,11 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.conectasenas.Usuario
 
 @Composable
 fun LoginScreen(
-    listaUsuarios: List<Usuario>,
+    alIniciarSesion: (String, String) -> Boolean,
+    alIniciarSesionCorrectamente: () -> Unit,
     alPresionarCrearCuenta: () -> Unit,
     alPresionarRecuperarContrasena: () -> Unit
 ) {
@@ -85,13 +85,9 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                val usuarioEncontrado = listaUsuarios.find { usuario ->
-                    usuario.correo == correoEscrito &&
-                            usuario.contrasena == contrasenaEscrita
-                }
-
-                if (usuarioEncontrado != null) {
+                if (alIniciarSesion(correoEscrito, contrasenaEscrita)) {
                     mensajeLogin = "Inicio de sesión correcto."
+                    alIniciarSesionCorrectamente()
                 } else {
                     mensajeLogin = "Correo o contraseña incorrectos."
                 }

@@ -22,11 +22,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.conectasenas.Usuario
 
 @Composable
 fun RecuperarScreen(
-    listaUsuarios: List<Usuario>,
+    existeCorreo: (String) -> Boolean,
     alVolverAlLogin: () -> Unit
 ) {
     var correoEscrito by rememberSaveable { mutableStateOf("") }
@@ -83,11 +82,7 @@ fun RecuperarScreen(
 
         Button(
             onClick = {
-                val usuarioEncontrado = listaUsuarios.find { usuario ->
-                    usuario.correo == correoEscrito
-                }
-
-                if (usuarioEncontrado != null) {
+                if (existeCorreo(correoEscrito)) {
                     mensajeRecuperacion =
                         "Solicitud enviada por $metodoSeleccionado."
                 } else {

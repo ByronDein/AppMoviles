@@ -33,12 +33,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.conectasenas.Usuario
+import com.example.conectasenas.ResultadoRegistro
 
 @Composable
 fun RegistroScreen(
     listaUsuarios: List<Usuario>,
     alVolverAlLogin: () -> Unit,
-    alRegistrarUsuario: (Usuario) -> Boolean
+    alRegistrarUsuario: (Usuario) -> ResultadoRegistro
 ) {
     var nombreEscrito by rememberSaveable { mutableStateOf("") }
     var correoEscrito by rememberSaveable { mutableStateOf("") }
@@ -234,10 +235,6 @@ fun RegistroScreen(
                     mensajeRegistro = "Selecciona una región."
                 } else if (!aceptaTerminos) {
                     mensajeRegistro = "Debes aceptar los términos y condiciones."
-                } else if (listaUsuarios.any { usuario ->
-                        usuario.correo == correoEscrito
-                    }) {
-                    mensajeRegistro = "Ese correo ya está registrado."
                 } else {
                     val usuarioNuevo = Usuario(
                         nombre = nombreEscrito,
@@ -247,16 +244,20 @@ fun RegistroScreen(
                         medioComunicacion = medioComunicacionSeleccionado
                     )
 
-                    val usuarioFueRegistrado = alRegistrarUsuario(usuarioNuevo)
+                    when (alRegistrarUsuario(usuarioNuevo)) {
+                        ResultadoRegistro.REGISTRO_CORRECTO -> {
+                            mensajeRegistro = "Usuario registrado correctamente."
 
-                    if (usuarioFueRegistrado) {
-                        mensajeRegistro = "Usuario registrado correctamente."
-
-                        nombreEscrito = ""
-                        correoEscrito = ""
-                        contrasenaEscrita = ""
-                    } else {
-                        mensajeRegistro = "Solo se permite registrar 5 usuarios."
+                            nombreEscrito = ""
+                            correoEscrito = ""
+                            contrasenaEscrita = ""
+                        }
+                        ResultadoRegistro.LIMITE_ALCANZADO -> {
+                            mensajeRegistro = "Solo se permite registrar 5 usuarios."
+                        }
+                        ResultadoRegistro.CORREO_REPETIDO -> {
+                            mensajeRegistro = "Ese correo ya está registrado."
+                        }
                     }
                 }
             },

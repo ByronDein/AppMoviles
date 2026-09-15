@@ -6,14 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.conectasenas.screens.LoginScreen
+import com.example.conectasenas.screens.InicioScreen
 import com.example.conectasenas.screens.RecuperarScreen
 import com.example.conectasenas.screens.RegistroScreen
 import com.example.conectasenas.ui.theme.ConectasenasTheme
@@ -34,46 +33,58 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AplicacionConectaSenas() {
-    var pantallaActual by rememberSaveable { mutableStateOf("login") }
+    val navController = rememberNavController()
+    val repositorioUsuarios = remember { UsuarioRepository() }
 
-    // Esta lista guarda los usuarios mientras la aplicación está abierta.
-    val listaUsuarios = remember { mutableStateListOf<Usuario>() }
-
-    when (pantallaActual) {
-        "login" -> {
+    NavHost(
+        navController = navController,
+        startDestination = Destino.Login.ruta
+    ) {
+        composable(Destino.Login.ruta) {
             LoginScreen(
-                listaUsuarios = listaUsuarios,
+                alIniciarSesion = { correo, contrasena ->
+                    repositorioUsuarios.iniciarSesion(correo, contrasena)
+                },
+                alIniciarSesionCorrectamente = {
+                    navController.navigate(Destino.Inicio.ruta)
+                },
                 alPresionarCrearCuenta = {
-                    pantallaActual = "registro"
+                    navController.navigate(Destino.Registro.ruta)
                 },
                 alPresionarRecuperarContrasena = {
-                    pantallaActual = "recuperar"
+                    navController.navigate(Destino.Recuperar.ruta)
                 }
             )
         }
 
-        "registro" -> {
+        composable(Destino.Registro.ruta) {
             RegistroScreen(
-                listaUsuarios = listaUsuarios,
+                listaUsuarios = repositorioUsuarios.listaUsuarios,
                 alVolverAlLogin = {
-                    pantallaActual = "login"
+                    navController.popBackStack()
                 },
                 alRegistrarUsuario = { usuarioNuevo ->
-                    if (listaUsuarios.size < 5) {
-                        listaUsuarios.add(usuarioNuevo)
-                        true
-                    } else {
-                        false
-                    }
+                    repositorioUsuarios.registrar(usuarioNuevo)
                 }
             )
         }
 
-        "recuperar" -> {
+        composable(Destino.Recuperar.ruta) {
             RecuperarScreen(
-                listaUsuarios = listaUsuarios,
+                existeCorreo = { correo ->
+                    repositorioUsuarios.existeCorreo(correo)
+                },
                 alVolverAlLogin = {
-                    pantallaActual = "login"
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Destino.Inicio.ruta) {
+            InicioScreen(
+                listaUsuariosRegistrados = repositorioUsuarios.listaUsuarios,
+                alCerrarSesion = {
+                    navController.popBackStack()
                 }
             )
         }
