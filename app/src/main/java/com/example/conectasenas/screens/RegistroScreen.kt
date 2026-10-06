@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -32,14 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.conectasenas.Usuario
 import com.example.conectasenas.ResultadoRegistro
 
 @Composable
 fun RegistroScreen(
-    listaUsuarios: List<Usuario>,
     alVolverAlLogin: () -> Unit,
-    alRegistrarUsuario: (Usuario) -> ResultadoRegistro
+    alRegistrarUsuario: (String, String, String, String, String, (ResultadoRegistro) -> Unit) -> Unit
 ) {
     var nombreEscrito by rememberSaveable { mutableStateOf("") }
     var correoEscrito by rememberSaveable { mutableStateOf("") }
@@ -60,6 +57,7 @@ fun RegistroScreen(
     var aceptaTerminos by rememberSaveable { mutableStateOf(false) }
 
     var mensajeRegistro by rememberSaveable { mutableStateOf("") }
+    var cargando by rememberSaveable { mutableStateOf(false) }
 
     val listaRegiones = listOf(
         "Metropolitana",
@@ -105,7 +103,7 @@ fun RegistroScreen(
             onValueChange = { contrasenaNueva ->
                 contrasenaEscrita = contrasenaNueva
             },
-            label = { Text("Contraseña") },
+            label = { Text("Contraseña (mínimo 6 caracteres)") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -226,41 +224,51 @@ fun RegistroScreen(
 
         Button(
             onClick = {
-                if (nombreEscrito.isBlank() ||
-                    correoEscrito.isBlank() ||
-                    contrasenaEscrita.isBlank()
-                ) {
-                    mensajeRegistro = "Completa nombre, correo y contraseña."
-                } else if (regionSeleccionada == "Seleccionar región") {
+                if (regionSeleccionada == "Seleccionar región") {
                     mensajeRegistro = "Selecciona una región."
                 } else if (!aceptaTerminos) {
                     mensajeRegistro = "Debes aceptar los términos y condiciones."
                 } else {
-                    val usuarioNuevo = Usuario(
-                        nombre = nombreEscrito,
-                        correo = correoEscrito,
-                        contrasena = contrasenaEscrita,
-                        region = regionSeleccionada,
-                        medioComunicacion = medioComunicacionSeleccionado
-                    )
+                    cargando = true
+                    mensajeRegistro = "Registrando usuario..."
 
-                    when (alRegistrarUsuario(usuarioNuevo)) {
-                        ResultadoRegistro.REGISTRO_CORRECTO -> {
-                            mensajeRegistro = "Usuario registrado correctamente."
+                    alRegistrarUsuario(
+                        nombreEscrito,
+                        correoEscrito,
+                        contrasenaEscrita,
+                        regionSeleccionada,
+                        medioComunicacionSeleccionado
+                    ) { resultado ->
+                        cargando = false
 
-                            nombreEscrito = ""
-                            correoEscrito = ""
-                            contrasenaEscrita = ""
-                        }
-                        ResultadoRegistro.LIMITE_ALCANZADO -> {
-                            mensajeRegistro = "Solo se permite registrar 5 usuarios."
-                        }
-                        ResultadoRegistro.CORREO_REPETIDO -> {
-                            mensajeRegistro = "Ese correo ya está registrado."
+                        when (resultado) {
+                            ResultadoRegistro.REGISTRO_CORRECTO -> {
+                                mensajeRegistro = "Usuario registrado correctamente."
+
+                                nombreEscrito = ""
+                                correoEscrito = ""
+                                contrasenaEscrita = ""
+                            }
+                            ResultadoRegistro.DATOS_INCOMPLETOS -> {
+                                mensajeRegistro = "Completa nombre, correo y contraseña."
+                            }
+                            ResultadoRegistro.CORREO_INVALIDO -> {
+                                mensajeRegistro = "El correo no es válido."
+                            }
+                            ResultadoRegistro.CONTRASENA_CORTA -> {
+                                mensajeRegistro = "La contraseña debe tener al menos 6 caracteres."
+                            }
+                            ResultadoRegistro.CORREO_REPETIDO -> {
+                                mensajeRegistro = "Ese correo ya está registrado."
+                            }
+                            ResultadoRegistro.ERROR -> {
+                                mensajeRegistro = "No se pudo registrar. Revisa tu internet."
+                            }
                         }
                     }
                 }
             },
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Registrar usuario")
@@ -273,47 +281,8 @@ fun RegistroScreen(
             )
         }
 
-        TablaDeUsuarios(listaUsuarios = listaUsuarios)
-
         TextButton(onClick = alVolverAlLogin) {
             Text("Volver a iniciar sesión")
-        }
-    }
-}
-
-@Composable
-fun TablaDeUsuarios(listaUsuarios: List<Usuario>) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text("Usuarios registrados: ${listaUsuarios.size}/5")
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Nombre",
-                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = "Correo",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            listaUsuarios.forEach { usuarioActual ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = usuarioActual.nombre,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text = usuarioActual.correo,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
         }
     }
 }

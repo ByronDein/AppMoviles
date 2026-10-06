@@ -1,3 +1,6 @@
 <resources>
-    <string name="app_name">conectasenas</string>
+    <string name="app_name">ConectaSeñas</string>
+    <string name="widget_titulo">ConectaSeñas</string>
+    <string name="widget_boton">Abrir la app</string>
+    <string name="widget_descripcion">Acceso rápido a ConectaSeñas</string>
 </resources>

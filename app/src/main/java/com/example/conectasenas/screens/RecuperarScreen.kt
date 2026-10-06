@@ -2,7 +2,6 @@ package com.example.conectasenas.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -19,20 +17,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.conectasenas.ResultadoRecuperar
 
 @Composable
 fun RecuperarScreen(
-    existeCorreo: (String) -> Boolean,
+    alRecuperar: (String, (ResultadoRecuperar) -> Unit) -> Unit,
     alVolverAlLogin: () -> Unit
 ) {
     var correoEscrito by rememberSaveable { mutableStateOf("") }
-    var metodoSeleccionado by rememberSaveable {
-        mutableStateOf("Correo electrónico")
-    }
     var mensajeRecuperacion by rememberSaveable { mutableStateOf("") }
+    var cargando by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -47,7 +43,7 @@ fun RecuperarScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("Ingresa tu correo para solicitar una recuperación.")
+        Text("Ingresa tu correo y te enviaremos un enlace para crear una contraseña nueva.")
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -60,36 +56,35 @@ fun RecuperarScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(
-                selected = metodoSeleccionado == "Correo electrónico",
-                onClick = {
-                    metodoSeleccionado = "Correo electrónico"
-                }
-            )
-            Text("Correo electrónico")
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(
-                selected = metodoSeleccionado == "Mensaje de texto",
-                onClick = {
-                    metodoSeleccionado = "Mensaje de texto"
-                }
-            )
-            Text("Mensaje de texto")
-        }
+        Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
-                if (existeCorreo(correoEscrito)) {
-                    mensajeRecuperacion =
-                        "Solicitud enviada por $metodoSeleccionado."
-                } else {
-                    mensajeRecuperacion =
-                        "No existe un usuario registrado con ese correo."
+                cargando = true
+                mensajeRecuperacion = "Enviando solicitud..."
+
+                alRecuperar(correoEscrito) { resultado ->
+                    cargando = false
+
+                    when (resultado) {
+                        ResultadoRecuperar.SOLICITUD_ENVIADA -> {
+                            mensajeRecuperacion =
+                                "Te enviamos un correo para recuperar tu contraseña."
+                        }
+                        ResultadoRecuperar.CORREO_INVALIDO -> {
+                            mensajeRecuperacion = "Escribe un correo válido."
+                        }
+                        ResultadoRecuperar.CORREO_NO_REGISTRADO -> {
+                            mensajeRecuperacion =
+                                "No existe un usuario registrado con ese correo."
+                        }
+                        ResultadoRecuperar.ERROR -> {
+                            mensajeRecuperacion = "No se pudo enviar. Revisa tu internet."
+                        }
+                    }
                 }
             },
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Enviar solicitud")

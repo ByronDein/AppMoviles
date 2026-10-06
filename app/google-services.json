@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "473500161342",
+    "project_id": "conectasenas-2a4c0",
+    "storage_bucket": "conectasenas-2a4c0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473500161342:android:718f3a499de1e7db1e086f",
+        "android_client_info": {
+          "package_name": "com.example.conectasenas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcL3zavsFdGLs_oaxGSITqRMUuaz1NCtY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

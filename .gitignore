@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Llave para firmar el APK y sus contraseñas (NUNCA subir a Git)
+keystore.properties
+*.jks
+*.keystore

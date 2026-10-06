@@ -5,5 +5,9 @@ sealed class Destino(val ruta: String) {
     data object Login : Destino("login")
     data object Registro : Destino("registro")
     data object Recuperar : Destino("recuperar")
-    data object Inicio : Destino("inicio")
+    data object Menu : Destino("menu")
+    data object Escribir : Destino("escribir")
+    data object Hablar : Destino("hablar")
+    data object BuscarDispositivo : Destino("buscar_dispositivo")
+    data object Perfil : Destino("perfil")
 }
