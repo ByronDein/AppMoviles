@@ -10,4 +10,5 @@ sealed class Destino(val ruta: String) {
     data object Hablar : Destino("hablar")
     data object BuscarDispositivo : Destino("buscar_dispositivo")
     data object Perfil : Destino("perfil")
+    data object Ayuda : Destino("ayuda")
 }

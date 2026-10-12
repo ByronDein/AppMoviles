@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.example.conectasenas.Dispositivo
 import com.example.conectasenas.DispositivoServicio
 import com.example.conectasenas.Validaciones
@@ -189,7 +191,7 @@ fun BuscarDispositivoScreen(
         }
 
         listaDispositivos.forEach { dispositivoActual ->
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
                         text = dispositivoActual.nombre,
@@ -201,11 +203,12 @@ fun BuscarDispositivoScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         TextButton(
                             onClick = {
-                                val direccion = Uri.parse(
+                                // toUri() es una extensión KTX de core-ktx
+                                val direccion = (
                                     "geo:${dispositivoActual.latitud},${dispositivoActual.longitud}" +
                                         "?q=${dispositivoActual.latitud},${dispositivoActual.longitud}" +
                                         "(${Uri.encode(dispositivoActual.nombre)})"
-                                )
+                                    ).toUri()
                                 try {
                                     contexto.startActivity(Intent(Intent.ACTION_VIEW, direccion))
                                 } catch (error: ActivityNotFoundException) {

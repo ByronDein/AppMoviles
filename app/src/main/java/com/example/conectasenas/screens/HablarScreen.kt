@@ -6,6 +6,7 @@ import android.content.Intent
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -110,7 +111,7 @@ fun HablarScreen(
         }
 
         // Texto grande para leerlo fácilmente
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Lo que se escuchó:",
@@ -220,7 +221,7 @@ fun HablarScreen(
         }
 
         listaMensajes.forEach { mensajeActual ->
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
                         text = mensajeActual.texto,

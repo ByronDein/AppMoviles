@@ -3,15 +3,24 @@ package com.example.conectasenas
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.conectasenas.screens.AyudaScreen
 import com.example.conectasenas.screens.BuscarDispositivoScreen
 import com.example.conectasenas.screens.EscribirScreen
 import com.example.conectasenas.screens.HablarScreen
@@ -59,7 +68,12 @@ fun AplicacionConectaSenas() {
 
     NavHost(
         navController = navController,
-        startDestination = pantallaInicial
+        startDestination = pantallaInicial,
+        // Animaciones al cambiar de pantalla
+        enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }) + fadeOut() },
+        popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }) + fadeIn() },
+        popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
     ) {
         composable(Destino.Login.ruta) {
             LoginScreen(
@@ -111,7 +125,19 @@ fun AplicacionConectaSenas() {
         }
 
         composable(Destino.Menu.ruta) {
+            // Se busca el nombre del usuario en Firestore para saludarlo
+            var nombreUsuario by remember { mutableStateOf("") }
+
+            LaunchedEffect(Unit) {
+                repositorioUsuarios.obtenerUsuarioActual { usuario ->
+                    if (usuario != null) {
+                        nombreUsuario = usuario.nombre
+                    }
+                }
+            }
+
             MenuScreen(
+                nombreUsuario = nombreUsuario,
                 alIrAEscribir = {
                     navController.navigate(Destino.Escribir.ruta)
                 },
@@ -123,6 +149,9 @@ fun AplicacionConectaSenas() {
                 },
                 alIrAPerfil = {
                     navController.navigate(Destino.Perfil.ruta)
+                },
+                alIrAAyuda = {
+                    navController.navigate(Destino.Ayuda.ruta)
                 },
                 alCerrarSesion = {
                     repositorioUsuarios.cerrarSesion()
@@ -157,6 +186,14 @@ fun AplicacionConectaSenas() {
             BuscarDispositivoScreen(
                 uid = repositorioUsuarios.uidActual() ?: "",
                 dispositivoServicio = dispositivoServicio,
+                alVolver = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Destino.Ayuda.ruta) {
+            AyudaScreen(
                 alVolver = {
                     navController.popBackStack()
                 }

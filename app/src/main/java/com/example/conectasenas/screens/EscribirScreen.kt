@@ -1,6 +1,7 @@
 package com.example.conectasenas.screens
 
 import android.speech.tts.TextToSpeech
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -198,7 +199,7 @@ fun EscribirScreen(
         }
 
         listaMensajes.forEach { mensajeActual ->
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
                         text = mensajeActual.texto,
